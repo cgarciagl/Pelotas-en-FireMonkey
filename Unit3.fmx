@@ -10,7 +10,7 @@ object Form3: TForm3
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
-  DesignerMasterStyle = 3
+  DesignerMasterStyle = 0
   object ToolBar1: TToolBar
     Size.Width = 450.000000000000000000
     Size.Height = 48.000000000000000000

@@ -24,6 +24,7 @@ type
     procedure FloatAnimation1Process(Sender: TObject);
   private
     procedure CalculaColisiones;
+    procedure ColisionConLosBordes();
     { Private declarations }
   public
     { Public declarations }
@@ -66,7 +67,6 @@ end;
 procedure TForm3.FloatAnimation1Process(Sender: TObject);
 begin
   Rectangle1.Repaint;
-
 end;
 
 procedure TForm3.CalculaColisiones;
@@ -98,6 +98,16 @@ begin
         Velocidades[i] := Velocidades[i] - V3 * (V1.X - V1.Y) / temp;
       end;
     end;
+  ColisionConLosBordes();
+end;
+
+procedure TForm3.ColisionConLosBordes();
+var
+  i: integer;
+  V1: TPointF;
+  Cuantos: integer;
+begin
+  Cuantos := Length(Centros);
   for i := 0 to Cuantos - 1 do
   begin
     V1 := Centros[i] + Velocidades[i];
@@ -137,7 +147,6 @@ begin
     Canvas.FillEllipse(R, 1);
   end;
   Canvas.EndScene;
-
   CalculaColisiones;
 end;
 
