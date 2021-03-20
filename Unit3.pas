@@ -4,9 +4,9 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants,
+  System.Variants, System.Generics.Collections,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
-  FMX.Controls.Presentation, FMX.Objects, FMX.Ani;
+  FMX.Controls.Presentation, FMX.Objects, FMX.Ani, Ball;
 
 type
   TForm3 = class(TForm)
@@ -22,15 +22,16 @@ type
       const ARect: TRectF);
     procedure TrackBar1Change(Sender: TObject);
     procedure FloatAnimation1Process(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     procedure CalculaColisiones;
-    procedure ColisionConLosBordes();
     { Private declarations }
   public
     { Public declarations }
     TamanioDelCirculo: single;
     Centros, Velocidades: Array of TPointF;
     Color: Array of Cardinal;
+    Pelotas: TObjectList<TBall>;
   end;
 
 var
@@ -46,21 +47,17 @@ uses System.UIConsts;
 
 procedure TForm3.btnAgregar10Click(Sender: TObject);
 var
-  Cuantos: integer;
   i: integer;
+  B: TBall;
 begin
   for i := 1 to 10 do
   begin
-    Cuantos := Length(Centros);
-    SetLength(Centros, Cuantos + 1);
-    SetLength(Velocidades, Cuantos + 1);
-    SetLength(Color, Cuantos + 1);
-    Centros[Cuantos] := TPointF.Create(random, random);
-    Velocidades[Cuantos] := TPointF.Create(random, random).Normalize * 0.01;
+    B := TBall.Create(Rectangle1, TrackBar1.Value);
+    Pelotas.Add(B);
     if random(100) > 50 then
-      Color[Cuantos] := TAlphaColorRec.Orange
+      B.Color := TAlphaColorRec.Orange
     else
-      Color[Cuantos] := TAlphaColorRec.Chocolate;
+      B.Color := TAlphaColorRec.Chocolate;
   end;
 end;
 
@@ -71,88 +68,49 @@ end;
 
 procedure TForm3.CalculaColisiones;
 var
-  Cuantos: integer;
-  S: TPointF;
   i: integer;
   j: integer;
-  V1: TPointF;
-  V2: TPointF;
-  V3: TPointF;
-  temp: single;
 begin
-  Cuantos := Length(Centros);
-  S := TPointF.Create(Rectangle1.Width - TamanioDelCirculo,
-    Rectangle1.Height - TamanioDelCirculo);
-  for i := 0 to Cuantos - 2 do
-    for j := i + 1 to Cuantos - 1 do
+  for i := 0 to Pelotas.count - 2 do
+    for j := i + 1 to Pelotas.count - 1 do
     begin
-      V1 := S * (Centros[i] + Velocidades[i]);
-      V2 := S * (Centros[j] + Velocidades[j]);
-      if (V1 - V2).Length < TamanioDelCirculo then
-      begin
-        V3 := Centros[j] - Centros[i];
-        temp := V3.DotProduct(V3);
-        V1.X := Velocidades[i].DotProduct(V3);
-        V1.Y := Velocidades[j].DotProduct(V3);
-        Velocidades[j] := Velocidades[j] - V3 * (V1.Y - V1.X) / temp;
-        Velocidades[i] := Velocidades[i] - V3 * (V1.X - V1.Y) / temp;
-      end;
+      Pelotas[i].collisionwith(Pelotas[j]);
     end;
-  ColisionConLosBordes();
-end;
-
-procedure TForm3.ColisionConLosBordes();
-var
-  i: integer;
-  V1: TPointF;
-  Cuantos: integer;
-begin
-  Cuantos := Length(Centros);
-  for i := 0 to Cuantos - 1 do
-  begin
-    V1 := Centros[i] + Velocidades[i];
-    if (V1.X < 0) or (V1.X > 1) then
-      Velocidades[i].X := -Velocidades[i].X;
-    if (V1.Y < 0) or (V1.Y > 1) then
-      Velocidades[i].Y := -Velocidades[i].Y;
-    V1 := Centros[i] + Velocidades[i];
-    Centros[i] := V1;
-  end;
 end;
 
 procedure TForm3.FormCreate(Sender: TObject);
 begin
   randomize();
   TamanioDelCirculo := 23;
+  Pelotas := TObjectList<TBall>.Create;
+end;
+
+procedure TForm3.FormResize(Sender: TObject);
+begin
+   TrackBar1Change(Sender);
 end;
 
 procedure TForm3.Rectangle1Paint(Sender: TObject; Canvas: TCanvas;
   const ARect: TRectF);
 var
-  i, Cuantos: integer;
-  R: TRectF;
-  S: TPointF;
+  i: integer;
 begin
-  Canvas.BeginScene;
-  Cuantos := Length(Centros);
-  S := TPointF.Create(Rectangle1.Width - TamanioDelCirculo,
-    Rectangle1.Height - TamanioDelCirculo);
-  for i := 0 to Cuantos - 1 do
+  for i := 0 to Pelotas.count - 1 do
   begin
-    R := TRectF.Empty;
-    R.Offset(TPointF.Create(TamanioDelCirculo, TamanioDelCirculo) * 0.5 +
-      Centros[i] * S);
-    R.Inflate(TamanioDelCirculo * 0.5, TamanioDelCirculo * 0.5);
-    Canvas.Fill.Color := Color[i];
-    Canvas.FillEllipse(R, 1);
+    Pelotas[i].update();
+    Pelotas[i].dibuja();
   end;
-  Canvas.EndScene;
   CalculaColisiones;
 end;
 
 procedure TForm3.TrackBar1Change(Sender: TObject);
+var
+  i: integer;
 begin
-  TamanioDelCirculo := TrackBar1.Value;
+  for i := 0 to Pelotas.count - 1 do
+  begin
+    Pelotas[i].tamanio := TrackBar1.Value;
+  end;
   Rectangle1.Repaint;
 end;
 
