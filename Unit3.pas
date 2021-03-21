@@ -23,6 +23,7 @@ type
     procedure TrackBar1Change(Sender: TObject);
     procedure FloatAnimation1Process(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     procedure CalculaColisiones;
     { Private declarations }
@@ -85,9 +86,18 @@ begin
   Pelotas := TObjectList<TBall>.Create;
 end;
 
+procedure TForm3.FormDestroy(Sender: TObject);
+var
+  i: integer;
+begin
+  for i := 0 to Pelotas.count - 1 do
+    Pelotas[i].Free;
+  Pelotas.Free;
+end;
+
 procedure TForm3.FormResize(Sender: TObject);
 begin
-   TrackBar1Change(Sender);
+  TrackBar1Change(Sender);
 end;
 
 procedure TForm3.Rectangle1Paint(Sender: TObject; Canvas: TCanvas;

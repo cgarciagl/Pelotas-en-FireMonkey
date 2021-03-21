@@ -6,23 +6,23 @@ uses System.Types, FMX.Graphics, FMX.Objects;
 
 type
   TBall = Class(TObject)
-    canvas: TCanvas;
+    Canvas: TCanvas;
     Rectangle: TRectangle;
-    puntoMaximo: TPointF;
+    PuntoMaximo: TPointF;
   private
     Ftamanio: single;
-    procedure Settamanio(const Value: single);
-    procedure calculaPuntoMaximo;
+    procedure SetTamanio(const Value: single);
+    procedure CalculaPuntoMaximo;
   public
     Centro: TPointF;
     Velocidad: TPointF;
     Color: Cardinal;
     constructor Create(R: TRectangle; pTamanio: single);
     procedure borderCollision();
-    procedure collisionwith(B: TBall);
+    procedure collisionWith(B: TBall);
     procedure Update();
     procedure Dibuja();
-    property tamanio: single read Ftamanio write Settamanio;
+    property Tamanio: single read Ftamanio write SetTamanio;
   end;
 
 implementation
@@ -31,16 +31,16 @@ uses System.UIConsts, FMX.Controls;
 
 { TBall }
 
-procedure TBall.collisionwith(B: TBall);
+procedure TBall.collisionWith(B: TBall);
 var
   V1: TPointF;
   V2: TPointF;
   V3: TPointF;
   temp: single;
 begin
-  V1 := puntoMaximo * (Centro + Velocidad);
-  V2 := puntoMaximo * (B.Centro + B.Velocidad);
-  if (V1 - V2).Length < tamanio then
+  V1 := PuntoMaximo * (Centro + Velocidad);
+  V2 := PuntoMaximo * (B.Centro + B.Velocidad);
+  if (V1 - V2).Length < Tamanio then
   begin
     V3 := B.Centro - Centro;
     temp := V3.DotProduct(V3);
@@ -54,10 +54,10 @@ end;
 constructor TBall.Create(R: TRectangle; pTamanio: single);
 begin
   Rectangle := R;
-  canvas := R.canvas;
-  tamanio := pTamanio;
-  puntoMaximo := TPointF.Create(0, 0);
-  calculaPuntoMaximo;
+  Canvas := R.Canvas;
+  Tamanio := pTamanio;
+  PuntoMaximo := TPointF.Create(0, 0);
+  CalculaPuntoMaximo;
   Centro := TPointF.Create(random, random);
   Velocidad := TPointF.Create(random, random).Normalize * 0.01;
 end;
@@ -67,22 +67,22 @@ var
   R: TRectF;
 begin
   R := TRectF.Empty;
-  R.Offset(TPointF.Create(tamanio, tamanio) * 0.5 + Centro * puntoMaximo);
-  R.Inflate(tamanio * 0.5, tamanio * 0.5);
-  canvas.Fill.Color := Color;
-  canvas.FillEllipse(R, 1);
+  R.Offset(TPointF.Create(Tamanio, Tamanio) * 0.5 + Centro * PuntoMaximo);
+  R.Inflate(Tamanio * 0.5, Tamanio * 0.5);
+  Canvas.Fill.Color := Color;
+  Canvas.FillEllipse(R, 1);
 end;
 
-procedure TBall.calculaPuntoMaximo;
+procedure TBall.CalculaPuntoMaximo;
 begin
-  puntoMaximo.X := Rectangle.Width - tamanio;
-  puntoMaximo.Y := Rectangle.Height - tamanio;
+  PuntoMaximo.X := Rectangle.Width - Tamanio;
+  PuntoMaximo.Y := Rectangle.Height - Tamanio;
 end;
 
-procedure TBall.Settamanio(const Value: single);
+procedure TBall.SetTamanio(const Value: single);
 begin
   Ftamanio := Value;
-  calculaPuntoMaximo;
+  CalculaPuntoMaximo;
 end;
 
 procedure TBall.Update;
