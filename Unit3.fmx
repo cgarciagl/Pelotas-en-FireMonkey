@@ -10,7 +10,6 @@ object Form3: TForm3
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   OnResize = FormResize
   DesignerMasterStyle = 0
   object ToolBar1: TToolBar
